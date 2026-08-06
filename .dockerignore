@@ -1,0 +1,12 @@
+Dockerfile
+docker-compose.yml
+.dockerignore
+node_modules
+.next
+.git
+.gitignore
+npm-debug.log
+data/browser_sessions
+data/db.json
+public/uploads/*
+!public/uploads/.gitkeep

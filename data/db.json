@@ -1,0 +1,218 @@
+{
+  "users": [
+    {
+      "_id": "sbjzhgjbo",
+      "id": "uqb65wlj9",
+      "createdAt": "2026-08-04T21:30:11.996Z",
+      "updatedAt": "2026-08-04T21:30:11.997Z",
+      "name": "Workspace Owner",
+      "email": "owner@pinteresthub.com",
+      "password": "hashed_password",
+      "role": "owner",
+      "subscriptionStatus": "pro",
+      "featureFlags": [
+        "ai-assistant",
+        "analytics-pro"
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "_id": "gr79e3vz1",
+      "id": "ke0fkfvnu",
+      "createdAt": "2026-08-04T21:30:12.003Z",
+      "updatedAt": "2026-08-04T21:30:19.193Z",
+      "userId": "uqb65wlj9",
+      "username": "crochetlover",
+      "email": "cusorf@gmail.com",
+      "password": "Qadeer@135",
+      "authMethod": "selenium",
+      "profileImage": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=200",
+      "followers": 2917,
+      "following": 1278,
+      "boardsCount": 12,
+      "monthlyViews": 168398,
+      "accessToken": "selenium_active_session",
+      "refreshToken": "",
+      "tokenExpiresAt": "2027-08-04T21:30:12.002Z",
+      "status": "connected",
+      "syncStatus": "synced",
+      "lastSyncTime": "2026-08-04T21:30:12.002Z"
+    }
+  ],
+  "boards": [
+    {
+      "_id": "tmhhydc59",
+      "id": "pqit46544",
+      "createdAt": "2026-08-04T21:30:19.181Z",
+      "updatedAt": "2026-08-04T21:30:19.181Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_1_1785879018724",
+      "name": "Craft Ideas",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 12,
+      "followers": 100,
+      "archived": false
+    },
+    {
+      "_id": "t7wrqndw6",
+      "id": "b7lesetyn",
+      "createdAt": "2026-08-04T21:30:19.182Z",
+      "updatedAt": "2026-08-04T21:30:19.182Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_2_1785879018755",
+      "name": "stitchn'",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 17,
+      "followers": 125,
+      "archived": false
+    },
+    {
+      "_id": "elwhi9kcr",
+      "id": "5j0kbgz86",
+      "createdAt": "2026-08-04T21:30:19.183Z",
+      "updatedAt": "2026-08-04T21:30:19.183Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_3_1785879018786",
+      "name": "Dress for the best",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 22,
+      "followers": 150,
+      "archived": false
+    },
+    {
+      "_id": "7jvlwio7i",
+      "id": "zxhvxcw70",
+      "createdAt": "2026-08-04T21:30:19.184Z",
+      "updatedAt": "2026-08-04T21:30:19.184Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_4_1785879018814",
+      "name": "Huerta baby",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 27,
+      "followers": 175,
+      "archived": false
+    },
+    {
+      "_id": "bbt1mg9u3",
+      "id": "w35k6ia2g",
+      "createdAt": "2026-08-04T21:30:19.185Z",
+      "updatedAt": "2026-08-04T21:30:19.185Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_5_1785879018859",
+      "name": "Strawberry baby",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 32,
+      "followers": 200,
+      "archived": false
+    },
+    {
+      "_id": "qa5kfk84c",
+      "id": "9wiucy4kq",
+      "createdAt": "2026-08-04T21:30:19.186Z",
+      "updatedAt": "2026-08-04T21:30:19.186Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_6_1785879018962",
+      "name": "Brooklyn",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 37,
+      "followers": 225,
+      "archived": false
+    },
+    {
+      "_id": "ivtqm7mzf",
+      "id": "zef3p9hjm",
+      "createdAt": "2026-08-04T21:30:19.187Z",
+      "updatedAt": "2026-08-04T21:30:19.187Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_7_1785879018983",
+      "name": "Nails",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 42,
+      "followers": 250,
+      "archived": false
+    },
+    {
+      "_id": "1jnj1ka4c",
+      "id": "6c4zncvj5",
+      "createdAt": "2026-08-04T21:30:19.188Z",
+      "updatedAt": "2026-08-04T21:30:19.188Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_8_1785879019008",
+      "name": "Low Carb/Keto",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 47,
+      "followers": 275,
+      "archived": false
+    },
+    {
+      "_id": "dlyt1y2cs",
+      "id": "mjy2fi7jb",
+      "createdAt": "2026-08-04T21:30:19.189Z",
+      "updatedAt": "2026-08-04T21:30:19.189Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_9_1785879019032",
+      "name": "Cricut",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 52,
+      "followers": 300,
+      "archived": false
+    },
+    {
+      "_id": "z9dy58094",
+      "id": "daglzfbcj",
+      "createdAt": "2026-08-04T21:30:19.190Z",
+      "updatedAt": "2026-08-04T21:30:19.190Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_10_1785879019055",
+      "name": "the biz",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 57,
+      "followers": 325,
+      "archived": false
+    },
+    {
+      "_id": "93dqpzedo",
+      "id": "fl6p6u499",
+      "createdAt": "2026-08-04T21:30:19.191Z",
+      "updatedAt": "2026-08-04T21:30:19.191Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_11_1785879019077",
+      "name": "Halloween",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 62,
+      "followers": 350,
+      "archived": false
+    },
+    {
+      "_id": "l9ui7eelv",
+      "id": "9m7delxc0",
+      "createdAt": "2026-08-04T21:30:19.192Z",
+      "updatedAt": "2026-08-04T21:30:19.192Z",
+      "accountId": "ke0fkfvnu",
+      "pinterestId": "sel_b_12_1785879019101",
+      "name": "hair and make up",
+      "description": "Automated board managed via Selenium",
+      "pinsCount": 67,
+      "followers": 375,
+      "archived": false
+    }
+  ],
+  "pins": [],
+  "contentLibrary": [],
+  "automationRules": [],
+  "activityLogs": [
+    {
+      "_id": "g22zixvdq",
+      "id": "99pmhmg8g",
+      "createdAt": "2026-08-04T21:30:19.195Z",
+      "updatedAt": "2026-08-04T21:30:19.195Z",
+      "userId": "uqb65wlj9",
+      "action": "account_connected",
+      "details": "Connected Pinterest account @crochetlover via Selenium automation",
+      "accountUsername": "crochetlover",
+      "status": "success"
+    }
+  ],
+  "teamMembers": []
+}
