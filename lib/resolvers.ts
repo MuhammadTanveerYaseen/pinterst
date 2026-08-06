@@ -652,6 +652,12 @@ export const resolvers = {
       return true;
     },
     
+    triggerAutomationCheck: async () => {
+      const { runSchedulerCheck } = await import('./scheduler');
+      await runSchedulerCheck();
+      return true;
+    },
+    
     inviteTeamMember: async (_parent: any, { email, role }: { email: string, role: string }, context: Context) => {
       verifyAuth(context);
       return {

@@ -1,5 +1,6 @@
-import { Pin, PinterestAccount, ActivityLog } from './models';
+import { Pin, PinterestAccount, ActivityLog, AutomationRule, ContentLibrary } from './models';
 import { PinterestService } from './pinterest';
+import { connectDB } from './db';
 
 declare global {
   var pinSchedulerTimer: NodeJS.Timeout | undefined;
@@ -101,7 +102,88 @@ export async function processPublishPin(pinId: string) {
 }
 
 /**
- * Start the background polling queue
+ * Main execution runner (works on both local dev and serverless Vercel Cron routes)
+ */
+export async function runSchedulerCheck(): Promise<{ processedCount: number; rulesExecuted: number }> {
+  await connectDB();
+  const now = new Date();
+  let processedCount = 0;
+  let rulesExecuted = 0;
+
+  try {
+    // 1. Auto-recover stuck pins older than 5 minutes
+    const publishingPins = await Pin.find({ status: 'publishing' });
+    for (const st of publishingPins) {
+      const stuckId = (st.id || st._id)?.toString();
+      const updatedTime = new Date(st.updatedAt || st.createdAt || 0);
+      if (stuckId && now.getTime() - updatedTime.getTime() > 5 * 60 * 1000) {
+        console.warn(`🔄 Auto-recovering stuck publishing pin ${stuckId} back to scheduled state.`);
+        await Pin.findByIdAndUpdate(stuckId, { status: 'scheduled' });
+      }
+    }
+
+    // 2. Find all due scheduled pins
+    const scheduledPins = await Pin.find({ status: 'scheduled' });
+    const duePins = scheduledPins.filter(pin => new Date(pin.scheduledAt) <= now);
+
+    if (duePins.length > 0) {
+      console.log(`🔔 Found ${duePins.length} due pins in queue. Processing...`);
+      for (const pin of duePins) {
+        const targetId = (pin.id || pin._id)?.toString();
+        if (targetId) {
+          try {
+            await processPublishPin(targetId);
+            processedCount++;
+          } catch (pErr) {
+            console.error(`❌ Queue batch error on pin ${targetId}:`, pErr);
+          }
+        }
+      }
+    }
+
+    // 3. Process Active Automation Rules
+    const activeRules = await AutomationRule.find({ status: 'active' });
+    const currentDayName = now.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+    
+    for (const rule of activeRules) {
+      const ruleDays = (rule.days || []).map((d: string) => d.toLowerCase());
+      if (ruleDays.includes(currentDayName) || rule.evergreen) {
+        const ruleId = (rule.id || rule._id)?.toString();
+        
+        // Find content library items to publish
+        const contentItems = await ContentLibrary.find({ userId: rule.userId });
+        if (contentItems.length > 0) {
+          const itemToPublish = contentItems[Math.floor(Math.random() * contentItems.length)];
+          const newPin = await Pin.create({
+            userId: rule.userId,
+            accountIds: rule.accountIds,
+            title: itemToPublish.title || rule.name,
+            description: itemToPublish.description || 'Auto-generated automation pin',
+            destinationUrl: itemToPublish.link || 'https://pinterest.com',
+            mediaUrl: itemToPublish.mediaUrl || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=600',
+            mediaType: 'image',
+            boardId: rule.boardId,
+            scheduledAt: new Date().toISOString(),
+            status: 'scheduled'
+          });
+
+          const pinId = (newPin.id || newPin._id)?.toString();
+          if (pinId) {
+            await processPublishPin(pinId);
+            rulesExecuted++;
+          }
+        }
+      }
+    }
+  } catch (err) {
+    console.error('❌ Error in runSchedulerCheck execution:', err);
+  }
+
+  return { processedCount, rulesExecuted };
+}
+
+/**
+ * Start the background polling queue for local development
  */
 export function initScheduler() {
   if (global.pinSchedulerTimer) {
@@ -112,49 +194,16 @@ export function initScheduler() {
   
   global.pinSchedulerTimer = setInterval(async () => {
     try {
-      const now = new Date();
-      
-      // Auto-recover stuck pins older than 5 minutes
-      const publishingPins = await Pin.find({ status: 'publishing' });
-      for (const st of publishingPins) {
-        const stuckId = (st.id || st._id)?.toString();
-        const updatedTime = new Date(st.updatedAt || st.createdAt || 0);
-        if (stuckId && now.getTime() - updatedTime.getTime() > 5 * 60 * 1000) {
-          console.warn(`🔄 Auto-recovering stuck publishing pin ${stuckId} back to scheduled state.`);
-          await Pin.findByIdAndUpdate(stuckId, { status: 'scheduled' });
-        }
-      }
-
-      const scheduledPins = await Pin.find({ status: 'scheduled' });
-      
-      const duePins = scheduledPins.filter(pin => {
-        return new Date(pin.scheduledAt) <= now;
-      });
-
-      if (duePins.length > 0) {
-        console.log(`🔔 Found ${duePins.length} due pins in queue. Processing crash-proof batch execution...`);
-        for (const pin of duePins) {
-          const targetId = (pin.id || pin._id)?.toString();
-          if (targetId) {
-            // Isolate execution so one failure never stops remaining queue items
-            try {
-              await processPublishPin(targetId);
-            } catch (pErr) {
-              console.error(`❌ Queue batch error on pin ${targetId}:`, pErr);
-            }
-          }
-        }
-      }
+      await runSchedulerCheck();
     } catch (err) {
       console.error('❌ Error in background scheduler polling:', err);
     }
-  }, 10000); // 10 seconds
+  }, 10000);
 }
 
 /**
  * Add pin to schedule
  */
 export async function schedulePin(pinId: string, scheduledAt: string) {
-  // Database-driven scheduling will be automatically picked up by the polling loop
   console.log(`📅 Pin ${pinId} saved to database. Scheduled to publish around: ${scheduledAt}`);
 }

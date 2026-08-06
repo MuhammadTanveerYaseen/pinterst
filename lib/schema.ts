@@ -236,6 +236,8 @@ export const typeDefs = `#graphql
     saveAutomationRule(input: AutomationRuleInput!): AutomationRule!
     deleteAutomationRule(id: ID!): Boolean!
     
+    triggerAutomationCheck: Boolean!
+    
     inviteTeamMember(email: String!, role: String!): TeamMember!
     removeTeamMember(id: ID!): Boolean!
   }

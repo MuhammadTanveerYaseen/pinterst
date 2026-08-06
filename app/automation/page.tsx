@@ -28,6 +28,12 @@ const GET_AUTOMATION_DATA = gql`
   }
 `;
 
+const TRIGGER_AUTOMATION = gql`
+  mutation TriggerAutomationCheck {
+    triggerAutomationCheck
+  }
+`;
+
 const SAVE_RULE = gql`
   mutation SaveRule($input: AutomationRuleInput!) {
     saveAutomationRule(input: $input) {
@@ -58,6 +64,18 @@ export default function AutomationPage() {
   const { data, loading, refetch } = useQuery(GET_AUTOMATION_DATA);
   const [saveRule] = useMutation(SAVE_RULE);
   const [deleteRule] = useMutation(DELETE_RULE);
+  const [triggerAutomation, { loading: triggerLoading }] = useMutation(TRIGGER_AUTOMATION);
+
+  const handleRunNow = async () => {
+    try {
+      if (window.showToast) window.showToast('Running automation rules check...', 'info');
+      await triggerAutomation();
+      await refetch();
+      if (window.showToast) window.showToast('Automation check executed successfully!');
+    } catch (e: any) {
+      if (window.showToast) window.showToast(e.message || 'Failed to run automation.', 'error');
+    }
+  };
 
   const [modalOpen, setModalOpen] = useState(false);
   const [ruleName, setRuleName] = useState('');
@@ -183,13 +201,25 @@ export default function AutomationPage() {
             <p className="text-sm text-neutral-500">Configure recurring schedulers, evergreen recyclers, and post intervals.</p>
           </div>
           
-          <button
-            onClick={handleOpenCreate}
-            className="inline-flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:opacity-95 shadow-md shadow-red-600/10 active:scale-[0.98] self-end sm:self-auto transition-all"
-          >
-            <Plus className="w-4 h-4" />
-            Create Rule
-          </button>
+          <div className="flex items-center gap-3 self-end sm:self-auto">
+            <button
+              onClick={handleRunNow}
+              disabled={triggerLoading}
+              className="inline-flex items-center gap-2 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200 font-semibold py-2.5 px-4 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800 shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 text-xs"
+              title="Run automation check immediately"
+            >
+              <Play className={`w-3.5 h-3.5 ${triggerLoading ? 'animate-spin text-red-500' : 'text-emerald-500'}`} />
+              {triggerLoading ? 'Running...' : 'Run Automation Now'}
+            </button>
+
+            <button
+              onClick={handleOpenCreate}
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-red-600 to-rose-600 text-white font-semibold py-2.5 px-4 rounded-xl hover:opacity-95 shadow-md shadow-red-600/10 active:scale-[0.98] transition-all text-xs"
+            >
+              <Plus className="w-4 h-4" />
+              Create Rule
+            </button>
+          </div>
         </div>
 
         {/* Loading Indicator */}

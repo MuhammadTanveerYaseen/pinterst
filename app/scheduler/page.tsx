@@ -91,6 +91,12 @@ const UPDATE_ACCOUNT_DEFAULT_LINK = gql`
   }
 `;
 
+const TRIGGER_AUTOMATION = gql`
+  mutation TriggerAutomationCheck {
+    triggerAutomationCheck
+  }
+`;
+
 const parseCsvPreview = (csv: string) => {
   if (!csv.trim()) return [];
   const lines = csv.split('\n').map(l => l.trim()).filter(Boolean);
@@ -127,6 +133,17 @@ export default function SchedulerPage() {
   const [bulkUpload, { loading: bulkLoading }] = useMutation(BULK_UPLOAD);
   const [generateAI, { loading: aiLoading }] = useMutation(GENERATE_AI);
   const [updateDefaultLink, { loading: updatingDefaultLink }] = useMutation(UPDATE_ACCOUNT_DEFAULT_LINK);
+  const [triggerAutomation, { loading: triggerLoading }] = useMutation(TRIGGER_AUTOMATION);
+
+  const handleRunQueueNow = async () => {
+    try {
+      if (window.showToast) window.showToast('Processing all due pins & automation rules...', 'info');
+      await triggerAutomation();
+      if (window.showToast) window.showToast('Scheduled queue processed successfully!');
+    } catch (e: any) {
+      if (window.showToast) window.showToast(e.message || 'Failed to run queue.', 'error');
+    }
+  };
 
   // Tabs: 'single' | 'bulk'
   const [activeTab, setActiveTab] = useState<'single' | 'bulk'>('single');
@@ -412,9 +429,21 @@ export default function SchedulerPage() {
       <div className="space-y-6">
         
         {/* Top Header */}
-        <div>
-          <h2 className="text-2xl font-extrabold tracking-tight">Post Scheduler</h2>
-          <p className="text-sm text-neutral-500">Design pins, generate SEO text, and queue them to post automatically.</p>
+        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+          <div>
+            <h2 className="text-2xl font-extrabold tracking-tight">Post Scheduler</h2>
+            <p className="text-sm text-neutral-500">Design pins, generate SEO text, and queue them to post automatically.</p>
+          </div>
+
+          <button
+            onClick={handleRunQueueNow}
+            disabled={triggerLoading}
+            className="inline-flex items-center gap-2 border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-700 dark:text-neutral-200 font-semibold py-2.5 px-4 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800 shadow-sm active:scale-[0.98] transition-all disabled:opacity-50 text-xs self-start sm:self-auto"
+            title="Trigger scheduled pin processing immediately"
+          >
+            <Play className={`w-3.5 h-3.5 ${triggerLoading ? 'animate-spin text-red-500' : 'text-emerald-500'}`} />
+            {triggerLoading ? 'Processing...' : 'Process Due Queue Now'}
+          </button>
         </div>
 
         {/* Tab Selector */}
