@@ -53,7 +53,7 @@ const UPDATE_DEFAULT_LINK = gql`
 `;
 
 export default function AccountsPage() {
-  const { data, loading, refetch } = useQuery(GET_ACCOUNTS);
+  const { data, loading, error, refetch } = useQuery(GET_ACCOUNTS);
   const [connectAccount, { loading: connectLoading }] = useMutation(CONNECT_ACCOUNT);
   const [disconnectAccount] = useMutation(DISCONNECT_ACCOUNT);
   const [updateDefaultLink] = useMutation(UPDATE_DEFAULT_LINK);
@@ -154,6 +154,17 @@ export default function AccountsPage() {
             </button>
           </div>
         </div>
+
+        {/* Error Banner */}
+        {error && (
+          <div className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-600 dark:text-amber-400 text-xs flex items-center justify-between animate-fade-in">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+              <span>Query Warning: {error.message}</span>
+            </div>
+            <button onClick={() => refetch()} className="underline font-bold hover:text-amber-700">Retry</button>
+          </div>
+        )}
 
         {/* Loading Indicator */}
         {loading && accounts.length === 0 ? (

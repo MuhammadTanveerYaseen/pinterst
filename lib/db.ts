@@ -3,11 +3,14 @@ import fs from 'fs';
 import path from 'path';
 import dns from 'dns';
 
-// Ensure public DNS resolvers are configured for MongoDB Atlas SRV record resolution if local ISP DNS fails
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
-} catch (dnsErr) {
-  // Ignore DNS setServers error if not permitted
+// Ensure public DNS resolvers are configured ONLY on Windows local dev (where local ISP DNS may fail SRV queries).
+// DO NOT call on Vercel or Linux serverless containers as AWS Lambda blocks custom DNS resolvers on port 53.
+if (process.platform === 'win32' && !process.env.VERCEL) {
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+  } catch (dnsErr) {
+    // Ignore DNS setServers error if not permitted
+  }
 }
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/pinterest-hub';
@@ -77,11 +80,13 @@ export async function connectDB() {
   
   hasAttemptedConnection = true;
   
-  // Set DNS servers right before connecting to handle SRV record lookups on Windows
-  try {
-    dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
-  } catch (dnsErr) {
-    // Ignore DNS setServers error if not permitted
+  // Set DNS servers ONLY on Windows local machine if needed
+  if (process.platform === 'win32' && !process.env.VERCEL) {
+    try {
+      dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+    } catch (dnsErr) {
+      // Ignore DNS setServers error if not permitted
+    }
   }
 
   const mongodbUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/pinterest-hub';
@@ -95,8 +100,8 @@ export async function connectDB() {
     isUsingMongoDB = true;
     console.log('🚀 Connected to MongoDB Atlas successfully!');
   } catch (error: any) {
-    // If SRV lookup failed due to DNS, try explicitly resetting Google/Cloudflare DNS and retrying
-    if (error?.message?.includes('querySrv') || error?.code === 'ECONNREFUSED' || error?.code === 'ENOTFOUND') {
+    // If SRV lookup failed on Windows, try explicitly setting Google DNS and retrying
+    if (process.platform === 'win32' && !process.env.VERCEL && (error?.message?.includes('querySrv') || error?.code === 'ECONNREFUSED' || error?.code === 'ENOTFOUND')) {
       try {
         console.log('🔄 Retrying MongoDB Atlas connection with Google DNS (8.8.8.8)...');
         dns.setServers(['8.8.8.8', '1.1.1.1']);
