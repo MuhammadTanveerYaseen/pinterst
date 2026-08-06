@@ -62,7 +62,8 @@ export class PlaywrightPinterestService {
   static async createPersistentContext(username: string): Promise<BrowserContext> {
     const isHeadless = process.env.SELENIUM_HEADLESS === 'true';
     const cleanUname = (username || 'default_user').replace(/[^a-zA-Z0-9_-]/g, '_');
-    const userDir = path.join(process.cwd(), 'data', 'browser_sessions', cleanUname);
+    const baseDir = process.env.VERCEL ? path.join('/tmp', 'data') : path.join(process.cwd(), 'data');
+    const userDir = path.join(baseDir, 'browser_sessions', cleanUname);
     
     if (!fs.existsSync(userDir)) {
       fs.mkdirSync(userDir, { recursive: true });

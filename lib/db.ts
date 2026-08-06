@@ -1,9 +1,17 @@
 import mongoose from 'mongoose';
 import fs from 'fs';
 import path from 'path';
+import dns from 'dns';
+
+// Ensure public DNS resolvers are configured for MongoDB Atlas SRV record resolution if local ISP DNS fails
+try {
+  dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+} catch (dnsErr) {
+  // Ignore DNS setServers error if not permitted
+}
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/pinterest-hub';
-const JSON_DB_DIR = path.join(process.cwd(), 'data');
+const JSON_DB_DIR = process.env.VERCEL ? path.join('/tmp', 'data') : path.join(process.cwd(), 'data');
 const JSON_DB_PATH = path.join(JSON_DB_DIR, 'db.json');
 
 export let isUsingMongoDB = false;
@@ -57,7 +65,7 @@ export function saveLocalDb() {
 let hasAttemptedConnection = false;
 
 export async function connectDB() {
-  // Prevent reconnecting if already connected or if connection was already attempted
+  // Prevent reconnecting if already connected
   if (isUsingMongoDB || (mongoose.connection && mongoose.connection.readyState === 1)) {
     isUsingMongoDB = true;
     return;
@@ -69,16 +77,43 @@ export async function connectDB() {
   
   hasAttemptedConnection = true;
   
+  // Set DNS servers right before connecting to handle SRV record lookups on Windows
   try {
-    console.log('🔌 Connecting to MongoDB at:', MONGODB_URI);
-    await mongoose.connect(MONGODB_URI, {
-      serverSelectionTimeoutMS: 3000, 
+    dns.setServers(['8.8.8.8', '1.1.1.1', '8.8.4.4']);
+  } catch (dnsErr) {
+    // Ignore DNS setServers error if not permitted
+  }
+
+  const mongodbUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/pinterest-hub';
+  const maskedUri = mongodbUri.replace(/:([^:@]+)@/, ':****@');
+
+  try {
+    console.log('🔌 Connecting to MongoDB at:', maskedUri);
+    await mongoose.connect(mongodbUri, {
+      serverSelectionTimeoutMS: 10000, 
     });
     isUsingMongoDB = true;
-    console.log('🚀 Connected to MongoDB successfully!');
-  } catch (error) {
-    console.log('⚠️ MongoDB connection failed. Falling back to local JSON database.');
+    console.log('🚀 Connected to MongoDB Atlas successfully!');
+  } catch (error: any) {
+    // If SRV lookup failed due to DNS, try explicitly resetting Google/Cloudflare DNS and retrying
+    if (error?.message?.includes('querySrv') || error?.code === 'ECONNREFUSED' || error?.code === 'ENOTFOUND') {
+      try {
+        console.log('🔄 Retrying MongoDB Atlas connection with Google DNS (8.8.8.8)...');
+        dns.setServers(['8.8.8.8', '1.1.1.1']);
+        await mongoose.connect(mongodbUri, {
+          serverSelectionTimeoutMS: 10000,
+        });
+        isUsingMongoDB = true;
+        console.log('🚀 Connected to MongoDB Atlas successfully on retry!');
+        return;
+      } catch (retryErr: any) {
+        console.log('⚠️ MongoDB retry failed:', retryErr?.message || retryErr);
+      }
+    }
+
+    console.log('⚠️ MongoDB connection failed:', error?.message || error, '. Falling back to local JSON database.');
     isUsingMongoDB = false;
+    hasAttemptedConnection = false; // Allow retrying on subsequent requests
     loadLocalDb();
   }
 }

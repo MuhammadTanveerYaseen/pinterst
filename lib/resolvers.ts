@@ -260,22 +260,25 @@ export const resolvers = {
       }
 
       try {
+        const targetAccountId = (account as any)?.id || (account as any)?._id;
         const fetched = await PinterestService.fetchBoards(account!);
-        await Board.deleteMany({ accountId: account!.id });
-        for (const b of fetched) {
-          await Board.create({
-            accountId: account!.id!,
-            pinterestId: b.pinterestId,
-            name: b.name,
-            description: b.description,
-            pinsCount: b.pinsCount,
-            followers: b.followers,
-            archived: b.archived
+        if (targetAccountId) {
+          await Board.deleteMany({ accountId: targetAccountId });
+          for (const b of fetched) {
+            await Board.create({
+              accountId: targetAccountId,
+              pinterestId: b.pinterestId,
+              name: b.name,
+              description: b.description,
+              pinsCount: b.pinsCount,
+              followers: b.followers,
+              archived: b.archived
+            });
+          }
+          await PinterestAccount.findByIdAndUpdate(targetAccountId, {
+            boardsCount: fetched.length
           });
         }
-        await PinterestAccount.findByIdAndUpdate(account!.id!, {
-          boardsCount: fetched.length
-        });
       } catch (boardErr) {
         console.warn('⚠️ Syncing boards after connection failed:', boardErr);
       }

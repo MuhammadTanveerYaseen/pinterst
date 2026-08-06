@@ -6,7 +6,12 @@ import chrome from 'selenium-webdriver/chrome';
 import edge from 'selenium-webdriver/edge';
 
 // eslint-disable-next-line @typescript-eslint/no-require-imports
-const chromedriver = require('chromedriver');
+let chromedriver: any = null;
+try {
+  chromedriver = require('chromedriver');
+} catch (err) {
+  // Ignore missing chromedriver binary in Vercel serverless environment
+}
 
 export interface SeleniumPinInput {
   title: string;
@@ -32,7 +37,8 @@ export class SeleniumPinterestService {
 
       if (username) {
         const cleanUname = username.replace(/[^a-zA-Z0-9_-]/g, '_');
-        const userDir = path.join(process.cwd(), 'data', 'browser_sessions', `sel_${cleanUname}`);
+        const baseDir = process.env.VERCEL ? path.join('/tmp', 'data') : path.join(process.cwd(), 'data');
+        const userDir = path.join(baseDir, 'browser_sessions', `sel_${cleanUname}`);
         if (!fs.existsSync(userDir)) fs.mkdirSync(userDir, { recursive: true });
         options.addArguments(`--user-data-dir=${userDir}`);
       }
