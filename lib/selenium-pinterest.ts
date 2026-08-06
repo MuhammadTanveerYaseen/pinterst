@@ -26,6 +26,10 @@ export class SeleniumPinterestService {
    * Builds and configures a Selenium WebDriver instance with persistent profile sessions.
    */
   static async createDriver(username?: string): Promise<WebDriver> {
+    if (process.env.VERCEL) {
+      throw new Error('Selenium WebDriver is disabled in Vercel serverless runtime (desktop Chrome binary required).');
+    }
+
     const isHeadless = process.env.SELENIUM_HEADLESS === 'true';
     console.log(`🌐 [Selenium] Initializing WebDriver for @${username || 'default'} (headless: ${isHeadless})...`);
 

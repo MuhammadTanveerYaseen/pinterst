@@ -60,6 +60,10 @@ export class PlaywrightPinterestService {
    * Creates a persistent browser context to maintain logged-in user profile sessions permanently.
    */
   static async createPersistentContext(username: string): Promise<BrowserContext> {
+    if (process.env.VERCEL) {
+      throw new Error('Playwright Chromium is disabled in Vercel serverless runtime (Chromium binary required).');
+    }
+
     const isHeadless = process.env.SELENIUM_HEADLESS === 'true';
     const cleanUname = (username || 'default_user').replace(/[^a-zA-Z0-9_-]/g, '_');
     const baseDir = process.env.VERCEL ? path.join('/tmp', 'data') : path.join(process.cwd(), 'data');
